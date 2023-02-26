@@ -487,6 +487,7 @@ my %variables = (
         'server'              => setv(T_FQDNP, 1, 0, 'members.dyndns.org', undef),
         'login'               => setv(T_LOGIN, 1, 0, '',                   undef),
         'password'            => setv(T_PASSWD,1, 0, '',                   undef),
+        'password_file'       => setv(T_FILE,  0, 0, '',                   undef),
         'host'                => setv(T_STRING,1, 1, '',                   undef),
 
         'use'                 => setv(T_USE,   0, 0, 'ip',                 undef),
@@ -1647,6 +1648,14 @@ sub _read_config {
             ## override login and password if specified the old way.
             $locals{'login'}    = $login    if defined $login;
             $locals{'password'} = $password if defined $password;
+
+            ## Override password if specified via password file
+            if (exists $locals{'password_file'})
+            {
+                debug("Reading password file %s", $locals{'password_file'});
+                open(my $pwfile, "<", $locals{'password_file'}) or die;
+                $locals{'password'} = <$pwfile>;
+            }
 
             ## allow {host} to be a comma separated list of hosts
             foreach my $h (split_by_comma($host)) {
